@@ -6,43 +6,41 @@ import 'izitoast/dist/css/iziToast.min.css';
 const gallery = document.querySelector('.gallery');
 const loader = document.querySelector('.loader');
 
-export { renderGallery, loader, iziToast, SimpleLightbox };
+export { imagesTemplate, loader, iziToast, SimpleLightbox };
 
-function renderGallery(images, append = false) {
-  const markup = images
-    .map(
-      img => `
-        <li class="gallery-item">  <div class="image-card">  <a class="gallery-link" href="${img.largeImageURL}">
-              <img class="gallery-image" src="${img.webformatURL}" alt="${img.tags}" />
+function imageTemplate(image) {
+  let { webformatURL, largeImageURL, tags, likes, views, comments, downloads } =
+    image;
+
+  return `
+        <li class="gallery-item">  <div class="image-card">  <a class="gallery-link" href="${image.largeImageURL}">
+              <img class="gallery-image" src="${image.webformatURL}" alt="${image.tags}" />
             </a>
             <div class="gallery-meta">
               <ul class="gallery-stats">
                 <li class="stats-item">
                   <span class="stats-label">Likes</span>
-                  <span class="stats-value">${img.likes}</span>
+                  <span class="stats-value">${image.likes}</span>
                 </li>
                 <li class="stats-item">
                   <span class="stats-label">Views</span>
-                  <span class="stats-value">${img.views}</span>
+                  <span class="stats-value">${image.views}</span>
                 </li>
                 <li class="stats-item">
                   <span class="stats-label">Comments</span>
-                  <span class="stats-value">${img.comments}</span>
+                  <span class="stats-value">${image.comments}</span>
                 </li>
                 <li class="stats-item">
                   <span class="stats-label">Downloads</span>
-                  <span class="stats-value">${img.downloads}</span>
+                  <span class="stats-value">${image.downloads}</span>
                 </li>
               </ul>
             </div>
           </div>
         </li>
-      `
-    )
-    .join('');
-  if (append) {
-    gallery.insertAdjacentHTML('beforeend', markup);
-  } else {
-    gallery.innerHTML = markup;
-  }
+      `;
+}
+
+function imagesTemplate(images) {
+  return images.map(imageTemplate).join('');
 }

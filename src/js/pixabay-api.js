@@ -13,23 +13,16 @@ const axiosInstance = axios.create({
   },
 });
 
-let currentPage = 1;
-
-export async function fetchImages(query, page = currentPage, perPage = 40) {
+export async function fetchImages(query, page = 1, perPage = 40) {
   try {
-    const res = await axiosInstance.get('/', {
-      params: {
-        q: query,
-        page,
-        per_page: perPage,
-      },
+    const response = await axiosInstance.get('/', {
+      params: { q: query, page, per_page: perPage },
     });
-      if (res.data.hits.length > 0) { 
-        currentPage++;
-      }
-    return res.data.hits;
+    if (response.status !== 200) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+    return response.data.hits;
   } catch (error) {
-    console.error('Error fetching images:', error);
     return [];
   }
 }
