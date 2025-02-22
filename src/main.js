@@ -27,8 +27,6 @@ refs.form.addEventListener('submit', async e => {
   params.query = e.target.elements['search-query'].value.trim();
   params.page = 1;
   if (!params.query) {
-    console.warn('⚠️ Empty search query');
-
     iziToast.warning({
       title: 'Warning',
       message: 'Please enter a search term!',
