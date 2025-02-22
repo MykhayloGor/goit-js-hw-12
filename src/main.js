@@ -16,6 +16,7 @@ const params = {
   query: null,
   page: 1,
   perPage: 40,
+  totalHits: 0,
 };
 
 let lightbox = new SimpleLightbox('.gallery a');
@@ -26,6 +27,8 @@ refs.form.addEventListener('submit', async e => {
   params.query = e.target.elements['search-query'].value.trim();
   params.page = 1;
   if (!params.query) {
+    console.warn('⚠️ Empty search query');
+
     iziToast.warning({
       title: 'Warning',
       message: 'Please enter a search term!',
@@ -39,16 +42,20 @@ refs.form.addEventListener('submit', async e => {
   refs.gallery.innerHTML = '';
 
   try {
-    const images = await fetchImages(params.query, params.page, params.perPage);
-    params.total = images.totalHits;
-    if (!images || images.length === 0) {
+    const data = await fetchImages(params.query, params.page, params.perPage);
+    params.total = data.totalHits;
+    if (!data.hits || data.hits.length === 0) {
       showError('Sorry, no images found. Try again!');
       return;
     }
 
-    refs.gallery.innerHTML = imagesTemplate(images);
+    refs.gallery.innerHTML = imagesTemplate(data.hits);
     lightbox.refresh();
-    showLoadMoreBtn();
+    if (shouldShowLoadMore(data.totalHits, params.page, params.perPage)) {
+      showLoadMoreBtn();
+    } else {
+      showInfo("We're sorry, but you've reached the end of search results.");
+    }
   } catch (error) {
     showError('An error occurred while fetching images. Check console.');
   } finally {
@@ -61,19 +68,18 @@ refs.loadMoreBtn.addEventListener('click', async () => {
   params.page += 1;
 
   try {
-    const images = await fetchImages(params.query, params.page, params.perPage);
+    const data = await fetchImages(params.query, params.page, params.perPage);
 
-    if (!images || images.length === 0) {
+    if (!data.hits || data.hits.length === 0) {
       hideLoadMoreBtn();
       showInfo("We're sorry, but you've reached the end of search results.");
       return;
     }
 
-    refs.gallery.insertAdjacentHTML('beforeend', imagesTemplate(images));
+    refs.gallery.insertAdjacentHTML('beforeend', imagesTemplate(data.hits));
     lightbox.refresh();
     scrollPage();
-    const totalPages = Math.ceil(params.total / params.perPage);
-    if (params.page >= totalPages) {
+    if (!shouldShowLoadMore(params.total, params.page, params.perPage)) {
       hideLoadMoreBtn();
       showInfo("We're sorry, but you've reached the end of search results.");
     }
@@ -89,9 +95,7 @@ function showLoader() {
 }
 
 function hideLoader() {
-  setTimeout(() => {
-    refs.loader.classList.add('hidden');
-  }, 200);
+  refs.loader.classList.add('hidden');
 }
 
 function showLoadMoreBtn() {
@@ -125,4 +129,9 @@ function scrollPage() {
     top: cardHeight * 2,
     behavior: 'smooth',
   });
+}
+
+function shouldShowLoadMore(totalHits, page, perPage) {
+  const totalPages = Math.ceil(totalHits / perPage);
+  return page < totalPages;
 }

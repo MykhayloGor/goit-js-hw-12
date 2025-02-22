@@ -42,5 +42,8 @@ function imageTemplate(image) {
 }
 
 function imagesTemplate(images) {
+  if (!images || images.length === 0) {
+    return '';
+  }
   return images.map(imageTemplate).join('');
 }

@@ -18,7 +18,7 @@ export async function fetchImages(query, page = 1, perPage = 40) {
     const response = await axiosInstance.get('/', {
       params: { q: query, page, per_page: perPage },
     });
-    return response.data.hits;
+    return response.data;
   } catch (error) {
     return [];
   }
